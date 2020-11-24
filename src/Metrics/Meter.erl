@@ -46,12 +46,12 @@ record(BoundInstrument, Value) ->
 
 add(BoundInstrument, Value) ->
   fun() ->
-    otel_meter:add(BoundInstrument, Value)
+    otel_meter:record(BoundInstrument, Value)
   end.
 
 'add\''({Meter, {Name, _, _ }}, Value) ->
   fun() ->
-    otel_meter:add(Meter, Name, Value)
+    otel_meter:record(Meter, Name, Value)
   end.
 
 registerObserver({Meter, { Name, _, _ }}, Callback) -> fun () ->
