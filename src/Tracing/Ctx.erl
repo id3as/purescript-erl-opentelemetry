@@ -1,4 +1,4 @@
--module(openTelemetry_tracing_ctx).
+-module(openTelemetry_tracing_ctx@foreign).
 
 -export([ new/0
         , setValue/2

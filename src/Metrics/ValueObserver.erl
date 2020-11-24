@@ -1,4 +1,4 @@
--module(openTelemetry_metrics_valueObserver).
+-module(openTelemetry_metrics_valueObserver@foreign).
 
 -export([int/1,
          float/1]).

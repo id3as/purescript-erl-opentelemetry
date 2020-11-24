@@ -1,4 +1,4 @@
--module(openTelemetry_tracing_span).
+-module(openTelemetry_tracing_span@foreign).
 
 -export([ traceId/1
         , spanId/1

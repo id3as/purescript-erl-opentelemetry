@@ -1,4 +1,4 @@
--module(openTelemetry_tracing_baggage).
+-module(openTelemetry_tracing_baggage@foreign).
 
 -export([ create/1
         , read/2

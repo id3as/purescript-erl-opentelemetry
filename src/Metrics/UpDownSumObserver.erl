@@ -1,4 +1,4 @@
--module(openTelemetry_metrics_upDownSumObserver).
+-module(openTelemetry_metrics_upDownSumObserver@foreign).
 
 -export([int/1,
          float/1]).

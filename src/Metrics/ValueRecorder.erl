@@ -1,4 +1,4 @@
--module(openTelemetry_metrics_valueRecorder).
+-module(openTelemetry_metrics_valueRecorder@foreign).
 
 -export([int/1, float/1]).
 
