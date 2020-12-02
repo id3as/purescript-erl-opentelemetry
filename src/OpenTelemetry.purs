@@ -1,9 +1,10 @@
 module OpenTelemetry where
 
 import Prelude
+
 import Effect (Effect)
-import Erl.Data.Tuple (Tuple2)
 import Erl.Data.List (List)
+import Erl.Data.Tuple (Tuple2, tuple2)
 
 foreign import data Meter :: Type
 foreign import kind Synchronicity
@@ -18,7 +19,10 @@ foreign import kind Monotonicity
 foreign import data Monotonic :: Monotonicity
 foreign import data NonMonotonic :: Monotonicity
 
-data Label = Label String String
+type Label = Tuple2 String String
+
+label :: String -> String -> Label
+label = tuple2
 
 newtype InstrumentName = InstrumentName String
 derive instance eqInstrumentName :: Eq InstrumentName
