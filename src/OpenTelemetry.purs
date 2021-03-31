@@ -7,15 +7,15 @@ import Erl.Data.List (List)
 import Erl.Data.Tuple (Tuple2, tuple2)
 
 foreign import data Meter :: Type
-foreign import kind Synchronicity
+data Synchronicity
 foreign import data Synchronous :: Synchronicity
 foreign import data Asynchronous :: Synchronicity
 
-foreign import kind Additivity
+data Additivity
 foreign import data Additive :: Additivity
 foreign import data NonAdditive :: Additivity
 
-foreign import kind Monotonicity
+data Monotonicity
 foreign import data Monotonic :: Monotonicity
 foreign import data NonMonotonic :: Monotonicity
 
@@ -38,10 +38,17 @@ instance showMeterVersion :: Show MeterVersion where
   show (MeterVersion n) = "MeterVersion " <> n
 
 
-data InstrumentDefinition (s :: Synchronicity) (a :: Additivity) (m :: Monotonicity) d = InstrumentDefinition InstrumentName
-data Instrument (s :: Synchronicity) (a :: Additivity) (m :: Monotonicity) d = Instrument (InstrumentDefinition s a m d)
-data BoundInstrument (s :: Synchronicity) (a :: Additivity) (m :: Monotonicity) d = BoundInstrument (InstrumentDefinition s a m d)
-data ObserverResult (a :: Additivity) (m :: Monotonicity) d = ObserverResult
+data InstrumentDefinition :: Synchronicity -> Additivity -> Monotonicity -> Type -> Type
+data InstrumentDefinition s a m d = InstrumentDefinition InstrumentName
+
+data Instrument :: Synchronicity -> Additivity -> Monotonicity -> Type -> Type
+data Instrument s a m d = Instrument (InstrumentDefinition s a m d)
+
+data BoundInstrument :: Synchronicity -> Additivity -> Monotonicity -> Type -> Type
+data BoundInstrument s a m d = BoundInstrument (InstrumentDefinition s a m d)
+
+data ObserverResult :: Additivity -> Monotonicity -> Type -> Type
+data ObserverResult a m d = ObserverResult
 
 foreign import registerMeter :: MeterName -> MeterVersion -> Effect Unit
 foreign import registerApplicationMeter :: MeterName -> Effect Unit

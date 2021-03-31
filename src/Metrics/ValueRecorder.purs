@@ -1,6 +1,5 @@
 module OpenTelemetry.Metrics.ValueRecorder where
 
-import Prelude
 import OpenTelemetry as OpenTelemetry
 import OpenTelemetry (Synchronous, NonAdditive, NonMonotonic)
 
