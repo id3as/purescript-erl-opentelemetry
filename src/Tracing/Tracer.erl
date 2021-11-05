@@ -41,22 +41,38 @@ withSpan(Tracer, SpanName, Fun) ->
 
 setCurrentSpan(SpanCtx) ->
   fun() ->
-      otel_tracer:set_current_span(SpanCtx)
+      case SpanCtx of
+        {just, Span} ->
+          otel_tracer:set_current_span(Span);
+        {nothing} ->
+          otel_tracer:set_current_span(undefined)
+      end
   end.
 
 setCurrentChildSpan(Ctx, SpanCtx) ->
   fun() ->
-      otel_tracer:set_current_span(Ctx, SpanCtx)
+      case SpanCtx of
+        {just, Span} ->
+          otel_tracer:set_current_span(Ctx, Span);
+        {nothing} ->
+          otel_tracer:set_current_span(Ctx, undefined)
+      end
   end.
 
 currentSpan() ->
   fun() ->
-      otel_tracer:current_span_ctx()
+      case otel_tracer:current_span_ctx() of
+        undefined -> {nothing};
+        Other -> {just, Other}
+      end
   end.
 
 currentChildSpan(Ctx) ->
   fun() ->
-      otel_tracer:current_span_ctx(Ctx)
+      case otel_tracer:current_span_ctx(Ctx) of
+        undefined -> {nothing};
+        Other -> {just, Other}
+      end
   end.
 
 setAttribute(Name, Value) ->
@@ -66,12 +82,12 @@ setAttribute(Name, Value) ->
 
 setAttributes(Attributes) ->
   fun() ->
-      otel_tracer:set_attributes(Attributes)
+      otel_tracer:set_attributes(openTelemetry_tracing_span@foreign:record_to_list(Attributes))
   end.
 
 addEvent(Event, Attributes) ->
   fun() ->
-      otel_tracer:add_event(Event, Attributes)
+      otel_tracer:add_event(Event, openTelemetry_tracing_span@foreign:record_to_list(Attributes))
   end.
 
 setStatus(Status) ->

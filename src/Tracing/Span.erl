@@ -10,8 +10,13 @@
         , setStatus/2
         , updateName/2
         , endSpan/1
+        , record_to_list/1
         ]).
 
+record_to_list(Record) ->
+  lists:map(fun({Key, Value}) ->
+                { atom_to_binary(Key, utf8), Value }
+            end, maps:to_list(Record)).
 
 traceId(SpanCtx) ->
   otel_span:trace_id(SpanCtx).
@@ -32,12 +37,12 @@ setAttribute(SpanCtx, Name, Value) ->
 
 setAttributes(SpanCtx, Attributes) ->
   fun() ->
-    otel_span:set_attributes(SpanCtx, Attributes)
+    otel_span:set_attributes(SpanCtx, record_to_list(Attributes))
   end.
 
 addEvent(SpanCtx, Event, Attributes) ->
   fun() ->
-    otel_span:add_event(SpanCtx, Event, Attributes)
+    otel_span:add_event(SpanCtx, Event, record_to_list(Attributes))
   end.
 
 setStatus(SpanCtx, Status) ->
