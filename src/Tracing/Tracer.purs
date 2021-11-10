@@ -12,7 +12,6 @@ type TracedFun a
 
 foreign import startSpan :: Tracer -> SpanName -> Effect SpanCtx
 foreign import startChildSpan :: SpanCtx -> Tracer -> SpanName -> Effect (Tuple2 SpanCtx Ctx)
-foreign import endSpan :: Effect Unit
 
 foreign import withSpan :: forall a. Tracer -> SpanName -> TracedFun a -> Effect a
 
@@ -21,8 +20,5 @@ foreign import setCurrentChildSpan :: Ctx -> Maybe SpanCtx -> Effect Ctx
 foreign import currentSpan :: Effect (Maybe SpanCtx)
 foreign import currentChildSpan :: Ctx -> Effect (Maybe SpanCtx)
 
-foreign import setAttribute :: forall a. String -> a -> Effect Unit
-foreign import setAttributes :: forall r. Record r -> Effect Unit
-foreign import addEvent :: forall r. String -> Record r -> Effect Unit
 foreign import setStatus :: Status -> Effect Unit
 foreign import updateName :: SpanName -> Effect Unit

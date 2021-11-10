@@ -19,34 +19,34 @@
 
 registerMeter(Name, Version) ->
   fun() ->
-    opentelemetry:register_meter(binary_to_atom(Name, utf8), Version)
+    opentelemetry_experimental:register_meter(binary_to_atom(Name, utf8), Version)
   end.
 
 registerApplicationMeter(Name) ->
   fun() ->
-    opentelemetry:register_application_meter(binary_to_atom(Name, utf8))
+    opentelemetry_experimental:register_application_meter(binary_to_atom(Name, utf8))
   end.
 
 setDefaultMeter(Meter) ->
   fun() ->
-    opentelemetry:set_default_meter(Meter)
+    opentelemetry_experimental:set_default_meter(Meter)
   end.
 
 getDefaultMeter() ->
   fun() ->
-      opentelemetry:get_meter()
+      opentelemetry_experimental:get_meter()
   end.
 
 getMeter() ->
   [{current_stacktrace, Stack}] = erlang:process_info(self(), [current_stacktrace]),
   fun() ->
     {Module, _Fun, _Arity, _File, _Line} = walk_stack(Stack),
-    opentelemetry:get_meter(Module)
+    opentelemetry_experimental:get_meter(Module)
   end.
 
 'getMeter\''(MeterName) ->
   fun() ->
-    opentelemetry:get_meter(binary_to_atom(MeterName, utf8))
+    opentelemetry_experimental:get_meter(binary_to_atom(MeterName, utf8))
   end.
 
 registerTracer(Name, Version) ->
