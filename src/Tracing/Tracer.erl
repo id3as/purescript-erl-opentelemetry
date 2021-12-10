@@ -2,6 +2,7 @@
 
 -export([ startSpan/2
         , startChildSpan/3
+        , startLinkedSpan/3
         , endSpan/0
         , withSpan/3
         , setCurrentSpan/1
@@ -21,6 +22,11 @@ startSpan(Tracer, SpanName) ->
 startChildSpan(Ctx, Tracer, SpanName) ->
   fun() ->
       otel_tracer:start_span(Ctx, Tracer, SpanName, #{})
+  end.
+
+startLinkedSpan(Tracer, SpanName, Links) ->
+  fun() ->
+    otel_tracer:start_span(Tracer, SpanName, #{links => Links})
   end.
 
 endSpan() ->

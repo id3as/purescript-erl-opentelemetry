@@ -1,11 +1,28 @@
-module OpenTelemetry.Tracing.Span where
+module OpenTelemetry.Tracing.Span
+  ( addEvent
+  , endSpan
+  , hexSpanId
+  , hexTraceId
+  , isRecording
+  , setAttribute
+  , setAttributes
+  , setStatus
+  , spanId
+  , traceId
+  , traceState
+  , updateName
+  )
+  where
 
 import Prelude
+
 import Effect (Effect)
-import OpenTelemetry (SpanCtx, Attributes, Status, SpanName, TraceId, SpanId, TraceState)
+import OpenTelemetry (SpanCtx, SpanId, SpanName, Status, TraceId, TraceState)
 
 foreign import traceId :: SpanCtx -> TraceId
+foreign import hexTraceId :: SpanCtx -> String
 foreign import spanId :: SpanCtx -> SpanId
+foreign import hexSpanId :: SpanCtx -> String
 foreign import traceState :: SpanCtx -> TraceState
 foreign import isRecording :: SpanCtx -> Boolean
 foreign import setAttribute :: forall a. SpanCtx -> String -> a -> Effect Unit

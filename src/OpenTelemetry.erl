@@ -15,6 +15,7 @@
         , getTracer/0
         , 'getTracer\''/1
         , status/2
+        , link/2
         ]).
 
 registerMeter(Name, Version) ->
@@ -113,3 +114,5 @@ camel([H | T]) when $a =< H, H =< $z ->
   [H - 32 | T];
 camel(Other) ->
   Other.
+
+link(SpanCtx, Attributes) -> opentelemetry:link(SpanCtx, Attributes).
