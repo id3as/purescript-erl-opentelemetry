@@ -1,17 +1,33 @@
-module OpenTelemetry.Tracing.Tracer where
+module OpenTelemetry.Tracing.Tracer
+  ( TracedFun
+  , currentChildSpan
+  , currentSpan
+  , setCurrentChildSpan
+  , setCurrentSpan
+  , setStatus
+  , startChildSpan
+  , startLinkedSpan
+  , startSpan
+  , updateName
+  , withSpan
+  )
+  where
 
 import Prelude
-import OpenTelemetry (Tracer, SpanName, Ctx, SpanCtx, Status, Attributes)
+
+import Data.Maybe (Maybe)
 import Effect (Effect)
 import Effect.Uncurried (EffectFn1)
+import Erl.Data.List (List)
 import Erl.Data.Tuple (Tuple2)
-import Data.Maybe (Maybe)
+import OpenTelemetry (Ctx, Link, SpanCtx, SpanName, Status, Tracer)
 
 type TracedFun a
   = EffectFn1 SpanCtx a
 
 foreign import startSpan :: Tracer -> SpanName -> Effect SpanCtx
-foreign import startChildSpan :: SpanCtx -> Tracer -> SpanName -> Effect (Tuple2 SpanCtx Ctx)
+foreign import startChildSpan :: Ctx -> Tracer -> SpanName -> Effect (Tuple2 SpanCtx Ctx)
+foreign import startLinkedSpan :: Tracer -> SpanName -> List Link -> Effect SpanCtx
 
 foreign import withSpan :: forall a. Tracer -> SpanName -> TracedFun a -> Effect a
 

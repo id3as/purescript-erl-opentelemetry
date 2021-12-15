@@ -1,7 +1,9 @@
 -module(openTelemetry_tracing_span@foreign).
 
 -export([ traceId/1
+        , hexTraceId/1
         , spanId/1
+        , hexSpanId/1
         , traceState/1
         , isRecording/1
         , setAttribute/3
@@ -10,7 +12,6 @@
         , setStatus/2
         , updateName/2
         , endSpan/1
-        , record_to_list/1
         ]).
 
 record_to_list(Record) ->
@@ -21,8 +22,15 @@ record_to_list(Record) ->
 traceId(SpanCtx) ->
   otel_span:trace_id(SpanCtx).
 
+
+hexTraceId(SpanCtx) ->
+  otel_span:hex_trace_id(SpanCtx).
+
 spanId(SpanCtx) ->
   otel_span:span_id(SpanCtx).
+
+hexSpanId(SpanCtx) ->
+  otel_span:hex_span_id(SpanCtx).
 
 traceState(SpanCtx) ->
   otel_span:trace_state(SpanCtx).

@@ -116,16 +116,10 @@ let additions =
   }
 -------------------------------
 -}
-
-
 let upstream =
-      https://github.com/purerl/package-sets/releases/download/erl-0.13.6-20200715/packages.dhall sha256:98227ee8945a3c7ca4a105c1001dd067128e504bdd45cb6bd9c4509563d83fb9
+      https://github.com/purerl/package-sets/releases/download/erl-0.14.4-20211012-1/packages.dhall sha256:04b7cb6aaf4cc7323c2560c7b5c2f5e8459d2951997cf5084748e0f1cdbabd26
 
-let overrides = {
-    erl-lists =
-      upstream.erl-lists // { version = "1d059f0df04f1c83f35a6eae706bd86cda8b015e" }
-}
-
+let overrides = {=}
 
 let additions = {=}
 

@@ -82,6 +82,8 @@ foreign import data SpanCtx :: Type
 foreign import data Ctx :: Type
 foreign import data Status :: Type
 
+foreign import data Link :: Type
+
 newtype TraceId = TraceId Int
 newtype SpanId = SpanId Int
 
@@ -95,3 +97,5 @@ foreign import getTracer :: Effect Tracer
 foreign import getTracer' :: TracerName -> Effect Tracer
 
 foreign import status :: StatusCode -> String -> Status
+
+foreign import link :: forall a. SpanCtx -> Attributes a -> Link
