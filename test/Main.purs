@@ -15,7 +15,7 @@ import Erl.Data.List (nil, (:))
 import Erl.Data.Map as Map
 import Erl.Test.EUnit (TestF, runTests, setup, suite, test)
 import Erl.Untagged.Union (type (|$|), type (|+|), Nil, Union, inj)
-import OpenTelemetry (Attributes, SpanName(..), StatusCode(..), TracerName(..))
+import OpenTelemetry (Attributes, SpanName(..), StatusCode(..), TracerName(..), TracerVersion(..))
 import OpenTelemetry as OpenTelemetry
 import OpenTelemetry.Tracing.Span as Span
 import OpenTelemetry.Tracing.Tracer as Tracer
@@ -29,16 +29,17 @@ tests :: Free TestF Unit
 tests = 
   setup startup do
     suite "tracer" do
-      test "default module tracer" do
+      test "default tracer" do
         _tracer <- OpenTelemetry.getTracer
         pure unit
 
-      test "default tracer ??" do
-        _tracer <- OpenTelemetry.getDefaultTracer
+      test "named tracer/setDefaultTracer" do
+        tracer <- OpenTelemetry.getNamedTracer $ TracerName "some name"
+        OpenTelemetry.setDefaultTracer tracer
         pure unit
 
-      test "named tracer/setDefaultTracer" do
-        tracer <- OpenTelemetry.getTracer' $ TracerName "some name"
+      test "versioned tracer" do
+        tracer <- OpenTelemetry.getVersionedTracer (TracerName "some name") (TracerVersion "1.0.0") "not_uri"
         OpenTelemetry.setDefaultTracer tracer
         pure unit
       

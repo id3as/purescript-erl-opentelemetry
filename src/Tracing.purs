@@ -16,10 +16,9 @@ module OpenTelemetry.Tracing
   , TracerName(..)
   , TracerVersion(..)
   , getApplicationTracer
-  , getDefaultTracer
+  , getNamedTracer
   , getTracer
-  , getTracer'
-  , getTracerVersioned
+  , getVersionedTracer
   , link
   , setDefaultTracer
   , status
@@ -114,20 +113,18 @@ newtype TraceState
 foreign import setDefaultTracer :: Tracer -> Effect Unit
 
 -- | Get default tracer
-foreign import getDefaultTracer :: Effect Tracer
-
--- | Get module tracer
 foreign import getTracer :: Effect Tracer
 
 -- | Get named tracer
-foreign import getTracer' :: TracerName -> Effect Tracer
+foreign import getNamedTracer :: TracerName -> Effect Tracer
 
 -- | Get tracer specifying version and schema URL
-foreign import getTracerVersioned :: TracerName -> TracerVersion -> String -> Effect Tracer
+foreign import getVersionedTracer :: TracerName -> TracerVersion -> String -> Effect Tracer
 
 -- | Get application tracer for specified module
 foreign import getApplicationTracer :: Atom -> Effect Tracer
 
+-- This probably should be an ADT, these are known atoms
 foreign import status :: StatusCode -> String -> Status
 
 -- | Construct a Link
