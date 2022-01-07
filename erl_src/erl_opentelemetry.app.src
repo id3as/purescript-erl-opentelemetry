@@ -1,0 +1,11 @@
+{application, erl_opentelemetry,
+ [ {description, "erl opentelemetry bindings"}
+ , {vsn, "erl_opentelemetry"}
+ , {registered, []}
+ , {modules, []}
+ , {applications, [ kernel
+                  , stdlib
+                  , opentelemetry
+                  ]}
+ , {env, []}
+ ]}.
