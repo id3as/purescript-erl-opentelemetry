@@ -2,11 +2,14 @@
 
 -export([ new/0
         , setValue/2
-        , 'setValue\''/3
+        , setValueInCtx/3
         , getValue/1
         , getValueWithDefault/2
+        , getValueInCtx/3
         , clear/0
+        , clearCtx/1
         , remove/1
+        , removeInCtx/2
         , getCurrent/0
         , attach/1
         , detach/1
@@ -21,7 +24,7 @@ setValue(Name, Value) ->
       otel_ctx:set_value(Name, Value)
   end.
 
-'setValue\''(Ctx, Name, Value) ->
+setValueInCtx(Ctx, Name, Value) ->
   otel_ctx:set_value(Ctx, Name, Value).
 
 getValue(Name) ->
@@ -37,15 +40,23 @@ getValueWithDefault(Name, Default) ->
     otel_ctx:get_value(Name, Default)
   end.
 
+getValueInCtx(Ctx, Name, Default) ->
+  otel_ctx:get_value(Ctx, Name, Default).
+
 clear() ->
   fun() ->
     otel_ctx:clear()
   end.
 
+clearCtx(Ctx) -> otel_ctx:clear(Ctx).
+
 remove(Name) ->
   fun() ->
       otel_ctx:remove(Name)
   end.
+
+removeInCtx(Ctx, Name) ->
+  otel_ctx:remove(Ctx, Name).
 
 getCurrent() ->
   fun() ->

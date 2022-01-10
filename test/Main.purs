@@ -13,10 +13,13 @@ import Effect.Uncurried (mkEffectFn1)
 import Erl.Atom (Atom, atom)
 import Erl.Data.List (nil, (:))
 import Erl.Data.Map as Map
+import Erl.Data.Tuple (tuple2)
 import Erl.Test.EUnit (TestF, runTests, setup, suite, test)
 import Erl.Untagged.Union (type (|$|), type (|+|), Nil, Union, inj)
 import OpenTelemetry (Attributes, SpanName(..), StatusCode(..), TracerName(..), TracerVersion(..))
 import OpenTelemetry as OpenTelemetry
+import OpenTelemetry.Tracing.Baggage as Baggage
+import OpenTelemetry.Tracing.Ctx as Ctx
 import OpenTelemetry.Tracing.Span as Span
 import OpenTelemetry.Tracing.Tracer as Tracer
 import Test.Assert (assertEqual)
@@ -47,47 +50,114 @@ tests =
         _tracer <- OpenTelemetry.getApplicationTracer $ atom "test_main@ps"
         pure unit
 
-    test "set a span" do
-      tracer <- OpenTelemetry.getTracer
-      spanCtx <- Tracer.startSpan tracer (SpanName "myspan") Tracer.defaultSpanStartOpts
-      Tracer.setCurrentSpan $ Just spanCtx
-      current <- Tracer.currentSpan
-      Span.endSpan spanCtx
-      assertEqual { actual: current, expected: Just spanCtx }
-
-    test "with span" do
-      tracer <- OpenTelemetry.getTracer
-      Tracer.withSpan tracer (SpanName "myspan") Tracer.defaultSpanStartOpts $ mkEffectFn1 \span -> do
+    suite "span" do
+      test "set a span" do
+        tracer <- OpenTelemetry.getTracer
+        spanCtx <- Tracer.startSpan tracer (SpanName "myspan") Tracer.defaultSpanStartOpts
+        Tracer.setCurrentSpan $ Just spanCtx
         current <- Tracer.currentSpan
-        assertEqual { actual: current, expected: Just span }
-      current <- Tracer.currentSpan
-      assertEqual { actual: current, expected: Nothing }
+        Span.endSpan spanCtx
+        assertEqual { actual: current, expected: Just spanCtx }
 
-    test "modify span" do
-      tracer <- OpenTelemetry.getTracer
-      spanCtx <- Tracer.startSpan tracer (SpanName "myspan") Tracer.defaultSpanStartOpts
-      Span.updateName spanCtx (SpanName "who knows if this does anything")      
-      Span.setAttribute spanCtx "attribute" (inj "value")
-      Span.setAttribute spanCtx "another_attribute" (inj 42)
-      Span.setStatus spanCtx $ OpenTelemetry.status (StatusCode "ok") "msg"
-      Span.setStatus spanCtx $ OpenTelemetry.status (StatusCode "bad_status_code") "msg"
-
-    test "attributes/links" do
-      tracer <- OpenTelemetry.getTracer
-      spanCtx <- Tracer.startSpan tracer (SpanName "other_span") Tracer.defaultSpanStartOpts
-
-      let attrs = (Map.empty :: Attributes)
-                  # Map.insert "str" (inj "str")
-                  # Map.insert "atom" (inj $ atom "atom")
-                  # Map.insert "int" (inj 42)
-                  # Map.insert "number" (inj 1.23)
-                  # Map.insert "bool" (inj $ atom "true") -- bleurgh
-                  # Map.insert "list" (inj ((inj "abc" :: Union |$| String |+| Atom |+| Int |+| Number |+| Nil) : inj 42 : nil)) -- BLEURGH
-
-      let links = OpenTelemetry.link spanCtx Map.empty : nil
-      Tracer.withSpan tracer (SpanName "myspan") (Tracer.defaultSpanStartOpts { attributes = attrs, links = links }) $ mkEffectFn1 \span -> do
+      test "with span" do
+        tracer <- OpenTelemetry.getTracer
+        Tracer.withSpan tracer (SpanName "myspan") Tracer.defaultSpanStartOpts $ mkEffectFn1 \span -> do
+          current <- Tracer.currentSpan
+          assertEqual { actual: current, expected: Just span }
         current <- Tracer.currentSpan
-        assertEqual { actual: current, expected: Just span }
+        assertEqual { actual: current, expected: Nothing }
+
+      test "modify span" do
+        tracer <- OpenTelemetry.getTracer
+        spanCtx <- Tracer.startSpan tracer (SpanName "myspan") Tracer.defaultSpanStartOpts
+        Span.updateName spanCtx (SpanName "who knows if this does anything")      
+        Span.setAttribute spanCtx "attribute" (inj "value")
+        Span.setAttribute spanCtx "another_attribute" (inj 42)
+        Span.setStatus spanCtx $ OpenTelemetry.status (StatusCode "ok") "msg"
+        Span.setStatus spanCtx $ OpenTelemetry.status (StatusCode "bad_status_code") "msg"
+
+      test "attributes/links" do
+        tracer <- OpenTelemetry.getTracer
+        spanCtx <- Tracer.startSpan tracer (SpanName "other_span") Tracer.defaultSpanStartOpts
+
+        let attrs = (Map.empty :: Attributes)
+                    # Map.insert "str" (inj "str")
+                    # Map.insert "atom" (inj $ atom "atom")
+                    # Map.insert "int" (inj 42)
+                    # Map.insert "number" (inj 1.23)
+                    # Map.insert "bool" (inj $ atom "true") -- bleurgh
+                    # Map.insert "list" (inj ((inj "abc" :: Union |$| String |+| Atom |+| Int |+| Number |+| Nil) : inj 42 : nil)) -- BLEURGH
+
+        let links = OpenTelemetry.link spanCtx Map.empty : nil
+        Tracer.withSpan tracer (SpanName "myspan") (Tracer.defaultSpanStartOpts { attributes = attrs, links = links }) $ mkEffectFn1 \span -> do
+          current <- Tracer.currentSpan
+          assertEqual { actual: current, expected: Just span }
+    
+    setup Ctx.clear do
+      suite "ctx" do
+        test "implicit ctx" do
+          Ctx.setValue "key" 42
+          result <- Ctx.getValue "key"
+          assertEqual { actual: result, expected: Just 42 }
+          result' :: Maybe Int <- Ctx.getValue "key2"
+          assertEqual { actual: result', expected: Nothing }
+
+        test "implicit ctx clear" do
+          Ctx.setValue "key" 42
+          Ctx.clear
+          result :: Maybe Int <- Ctx.getValue "key"
+          assertEqual { actual: result, expected: Nothing }
+
+        test "implicit ctx remove" do
+          Ctx.setValue "key" 42
+          Ctx.remove "key"
+          result :: Maybe Int <- Ctx.getValue "key"
+          assertEqual { actual: result, expected: Nothing }
+
+        test "explicit ctx" do
+          -- Also known as "it's a map"
+          let ctx = Ctx.new
+              ctx' = Ctx.setValueInCtx ctx "key" 42
+              result = Ctx.getValueInCtx ctx' "key" 0
+          assertEqual { actual: result, expected: 42 }
+          let ctx2 = Ctx.clearCtx ctx'
+              result2 = Ctx.getValueInCtx ctx2 "key" 0
+          assertEqual { actual: result2, expected: 0 }
+
+        test "explicit ctx clear" do
+          let ctx = Ctx.clearCtx $ Ctx.setValueInCtx Ctx.new "key" 42
+              result = Ctx.getValueInCtx ctx "key" 0
+          assertEqual { actual: result, expected: 0 }
+
+        test "explicit ctx remove" do
+          let ctx = flip Ctx.removeInCtx "key" $ Ctx.setValueInCtx Ctx.new "key" 42
+              result = Ctx.getValueInCtx ctx "key" 0
+          assertEqual { actual: result, expected: 0 }
+
+    setup Ctx.clear do
+      suite "baggage" do
+        test "implicit ctx baggage" do
+          let bag = Baggage.create $ tuple2 "k1" "v1" : tuple2 "k2" "v2" : nil
+          Baggage.set bag
+          Baggage.setValue "k3" "v3"
+          res <- Baggage.getAll
+          let actual = Baggage.read res "k1"
+          assertEqual { actual, expected: Just "v1" }
+          assertEqual { actual: Baggage.read res "k3", expected: Just "v3" }
+          assertEqual { actual: Baggage.read res "badkey", expected: Nothing }
+
+          pure unit
+
+        test "explicit ctx baggage" do
+          let bag = Baggage.create $ tuple2 "k1" "v1" : tuple2 "k2" "v2" : nil
+              ctx = Baggage.setInCtx Ctx.new bag
+              ctx' = Baggage.setValueInCtx ctx "k3" "v3"
+              res = Baggage.getAllInCtx ctx'
+          assertEqual { actual: Baggage.read res "k1", expected: Just "v1" }
+          assertEqual { actual: Baggage.read res "k3", expected: Just "v3" }
+          assertEqual { actual: Baggage.read res "badkey", expected: Nothing }
+
+          pure unit
 
 
 foreign import startup :: Effect Unit
