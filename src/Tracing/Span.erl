@@ -1,5 +1,8 @@
 -module(openTelemetry_tracing_span@foreign).
 
+-include_lib("opentelemetry_api/include/opentelemetry.hrl").
+
+
 -export([ traceId/1
         , hexTraceId/1
         , spanId/1
@@ -14,10 +17,6 @@
         , endSpan/1
         ]).
 
-record_to_list(Record) ->
-  lists:map(fun({Key, Value}) ->
-                { atom_to_binary(Key, utf8), Value }
-            end, maps:to_list(Record)).
 
 traceId(SpanCtx) ->
   otel_span:trace_id(SpanCtx).
@@ -45,12 +44,12 @@ setAttribute(SpanCtx, Name, Value) ->
 
 setAttributes(SpanCtx, Attributes) ->
   fun() ->
-    otel_span:set_attributes(SpanCtx, record_to_list(Attributes))
+    otel_span:set_attributes(SpanCtx, Attributes)
   end.
 
 addEvent(SpanCtx, Event, Attributes) ->
   fun() ->
-    otel_span:add_event(SpanCtx, Event, record_to_list(Attributes))
+    otel_span:add_event(SpanCtx, Event, Attributes)
   end.
 
 setStatus(SpanCtx, Status) ->

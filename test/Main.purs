@@ -93,6 +93,8 @@ tests =
         Tracer.withSpan tracer (SpanName "myspan") (Tracer.defaultSpanStartOpts { attributes = attrs, links = links }) $ mkEffectFn1 \span -> do
           current <- Tracer.currentSpan
           assertEqual { actual: current, expected: Just span }
+          Span.setAttributes span attrs
+          Span.setAttribute span "new_attr" (Attributes.int 1)
     
     setup Ctx.clear do
       suite "ctx" do
