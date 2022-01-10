@@ -23,6 +23,7 @@ import OpenTelemetry.Tracing.Ctx as Ctx
 import OpenTelemetry.Tracing.Span as Span
 import OpenTelemetry.Tracing.Tracer as Tracer
 import Test.Assert (assertEqual)
+import Tracing.Attributes as Attributes
 
 main :: Effect Unit
 main = void $ runTests tests
@@ -80,13 +81,13 @@ tests =
         tracer <- OpenTelemetry.getTracer
         spanCtx <- Tracer.startSpan tracer (SpanName "other_span") Tracer.defaultSpanStartOpts
 
-        let attrs = (Map.empty :: Attributes)
-                    # Map.insert "str" (inj "str")
-                    # Map.insert "atom" (inj $ atom "atom")
-                    # Map.insert "int" (inj 42)
-                    # Map.insert "number" (inj 1.23)
-                    # Map.insert "bool" (inj $ atom "true") -- bleurgh
-                    # Map.insert "list" (inj ((inj "abc" :: Union |$| String |+| Atom |+| Int |+| Number |+| Nil) : inj 42 : nil)) -- BLEURGH
+        let attrs = Map.empty
+                    # Map.insert "str" (Attributes.string "str")
+                    # Map.insert "atom" (Attributes.atom $ atom "atom")
+                    # Map.insert "int" (Attributes.int 42)
+                    # Map.insert "number" (Attributes.number 1.23)
+                    # Map.insert "bool" (Attributes.boolean true)
+                    # Map.insert "list" (Attributes.list (inj "abc" : inj 42 : nil))
 
         let links = OpenTelemetry.link spanCtx Map.empty : nil
         Tracer.withSpan tracer (SpanName "myspan") (Tracer.defaultSpanStartOpts { attributes = attrs, links = links }) $ mkEffectFn1 \span -> do
