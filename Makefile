@@ -11,9 +11,9 @@ PS_TEST_ERL_FFI = $(shell find ${TEST_SRC} -type f -name \*.erl)
 
 .DEFAULT_GOAL := erl
 
-all: erl docs
+all: erl
 
-ci: all test
+ci: erl test
 
 output/.complete: .spago $(PS_SOURCEFILES) $(PS_ERL_FFI)
 	spago build
