@@ -1,42 +1,28 @@
 -module(openTelemetry_tracing_tracer@foreign).
 
--export([ startSpan/2
-        , startChildSpan/3
-        , startLinkedSpan/3
-        , endSpan/0
-        , withSpan/3
+-export([ startSpanImpl/3
+        , startChildSpanImpl/4
+        , withSpanImpl/4
         , setCurrentSpan/1
         , setCurrentChildSpan/2
         , currentSpan/0
         , currentChildSpan/1
-        , setStatus/1
-        , updateName/1
         ]).
 
 
-startSpan(Tracer, SpanName) ->
+startSpanImpl(Tracer, SpanName, Opts) ->
   fun() ->
-      otel_tracer:start_span(Tracer, SpanName, #{})
+    otel_tracer:start_span(Tracer, SpanName, Opts)
   end.
 
-startChildSpan(Ctx, Tracer, SpanName) ->
+startChildSpanImpl(Ctx, Tracer, SpanName, Opts) ->
   fun() ->
-      otel_tracer:start_span(Ctx, Tracer, SpanName, #{})
+    otel_tracer:start_span(Ctx, Tracer, SpanName, Opts)
   end.
 
-startLinkedSpan(Tracer, SpanName, Links) ->
+withSpanImpl(Tracer, SpanName, Opts, Fun) ->
   fun() ->
-    otel_tracer:start_span(Tracer, SpanName, #{links => Links})
-  end.
-
-endSpan() ->
-  fun() ->
-    otel_tracer:end_span()
-  end.
-
-withSpan(Tracer, SpanName, Fun) ->
-  fun() ->
-    otel_tracer:with_span(Tracer, SpanName, Fun)
+    otel_tracer:with_span(Tracer, SpanName, Opts, Fun)
   end.
 
 setCurrentSpan(SpanCtx) ->
@@ -73,14 +59,4 @@ currentChildSpan(Ctx) ->
         undefined -> {nothing};
         Other -> {just, Other}
       end
-  end.
-
-setStatus(Status) ->
-  fun() ->
-      otel_tracer:set_status(Status)
-  end.
-
-updateName(Name) ->
-  fun() ->
-      otel_tracer:update_name(Name)
   end.

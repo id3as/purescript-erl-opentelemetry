@@ -4,8 +4,18 @@ You can edit this file as you like.
 -}
 { name = "erl-opentelemetry"
 , dependencies =
-  [ "effect", "erl-lists", "erl-tuples", "maybe", "prelude" ]
+  [ "effect"
+  , "erl-atom"
+  , "erl-lists"
+  , "erl-maps"
+  , "erl-tuples"
+  , "erl-untagged-union"
+  , "maybe"
+  , "prelude"
+  , "tuples"
+  , "unsafe-reference"
+  ]
 , packages = ./packages.dhall
-, sources = [ "src/**/*.purs", "test/**/*.purs" ]
+, sources = [ "src/**/*.purs" ]
 , backend = "purerl"
 }

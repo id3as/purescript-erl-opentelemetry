@@ -1,4 +1,8 @@
 output/
 .psc-package/
-.psc-ide-port.spago
+.psc-ide-port
 .spago/
+.vscode/
+testoutput/
+_build/
+*.dump
