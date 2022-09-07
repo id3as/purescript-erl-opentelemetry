@@ -4,9 +4,9 @@
        , newInstruments/2
        , bind/2
        , record/2
-       , 'record\''/2
+       , 'record\''/3
        , add/2
-       , 'add\''/2
+       , 'add\''/3
        , registerObserver/2
        , observe/3
         ]).
@@ -23,7 +23,7 @@ newInstrument(Meter, Definition) ->
 newInstruments(Meter, Definitions) ->
   fun() ->
     otel_meter:new_instruments(Meter, Definitions),
-    list:map(fun(Def) ->
+    lists:map(fun(Def) ->
                  { Meter, Def }
              end, Definitions)
   end.
@@ -39,9 +39,9 @@ record(BoundInstrument, Value) ->
     otel_meter:record(BoundInstrument, Value)
   end.
 
-'record\''({Meter, {Name, _, _ }}, Value) ->
+'record\''({Meter, {Name, _, _ }}, Value, Labels) ->
   fun() ->
-    otel_meter:record(Meter, Name, Value)
+    otel_meter:record(Meter, Name, Value, Labels)
   end.
 
 add(BoundInstrument, Value) ->
@@ -49,9 +49,9 @@ add(BoundInstrument, Value) ->
     otel_meter:record(BoundInstrument, Value)
   end.
 
-'add\''({Meter, {Name, _, _ }}, Value) ->
+'add\''({Meter, {Name, _, _ }}, Value, Labels) ->
   fun() ->
-    otel_meter:record(Meter, Name, Value)
+    otel_meter:record(Meter, Name, Value, Labels)
   end.
 
 registerObserver({Meter, { Name, _, _ }}, Callback) -> fun () ->

@@ -32,7 +32,7 @@ hexSpanId(SpanCtx) ->
   otel_span:hex_span_id(SpanCtx).
 
 traceState(SpanCtx) ->
-  otel_span:trace_state(SpanCtx).
+  otel_span:tracestate(SpanCtx).
 
 isRecording(SpanCtx) ->
   otel_span:is_recording(SpanCtx).
