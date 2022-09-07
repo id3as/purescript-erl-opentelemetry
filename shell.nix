@@ -12,22 +12,23 @@ let
     builtins.fetchGit {
       url = "https://github.com/purerl/nixpkgs-purerl.git";
       ref = "master";
-      rev = "16582722c40f4c1a65c15f23e5f2438c6905981f";
+      rev = "7eadeb83eb2590039c96386d572db3a2fce19370";
     };
 
-  purerlSupport =
-    builtins.fetchGit {
-      name = "purerl-support-packages";
-      url = "https://github.com/id3as/nixpkgs-purerl-support.git";
-      rev = "52926a56da6a8c526c403d26feaf52cc5f87a5d0";
-    };
+  easy-ps = import
+    (nixpkgs.pkgs.fetchFromGitHub {
+      ## not merged yet for 0.15.3 https://github.com/justinwoo/easy-purescript-nix/pull/210
+      owner = "toastal";
+      repo = "easy-purescript-nix";
+      rev = "ed00265f53ae3383a344ce642d40085601420455";
+      sha256 = "sha256-X47A46YVcOFTsmi2lFr3yo7EaufBd4ufrTR+ZlPoYz0=";
+    }) { pkgs = nixpkgs; };
 
   nixpkgs =
     import pinnedNix {
       overlays = [
         (import erlangReleases)
         (import purerlReleases)
-        (import purerlSupport)
       ];
     };
 
@@ -53,11 +54,11 @@ mkShell {
     erlangChannel.rebar3
     erlangChannel.erlang-ls
 
-    purerl-support.purescript-0-14-4
-    purerl-support.spago-0-20-3
+    easy-ps.purs-0_15_3
+    easy-ps.spago
 
     # Purerl backend for purescript
-    purerl.purerl-0-0-12
+    purerl.purerl-0-0-17
 
   ];
 }
