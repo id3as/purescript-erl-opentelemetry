@@ -4,11 +4,13 @@
          float/1]).
 
 int(Name) ->
-  otel_value_observer:definition(Name, #{
-                                   number_kind => integer
-                                  }).
+  fun(Meter) ->
+      otel_meter:create_counter(Meter, Name, #{description => <<>>,
+                                               unit => undefined})
+  end.
 
 float(Name) ->
-  otel_value_observer:definition(Name, #{
-                                   number_kind => float
-                                  }).
+  fun(Meter) ->
+      otel_meter:create_counter(Meter, Name, #{description => <<>>,
+                                               unit => undefined})
+  end.

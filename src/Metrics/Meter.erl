@@ -11,33 +11,36 @@
        , observe/3
         ]).
 
+-include_lib("opentelemetry_api_experimental/include/otel_metrics.hrl").
+
 %% These lie about the return value
 %% of the underlying API, but it is expected (hoped) at some point
 %% that otel_meter will return something we can use
 newInstrument(Meter, Definition) ->
   fun() ->
-    otel_meter:new_instruments(Meter, [Definition]),
-    { Meter, Definition }
+    Instance = Definition(Meter),
+    { Meter, Instance }
   end.
 
 newInstruments(Meter, Definitions) ->
   fun() ->
-    otel_meter:new_instruments(Meter, Definitions),
-    lists:map(fun(Def) ->
-                 { Meter, Def }
+    lists:map(fun(Definition) ->
+                  Instance = Definition(Meter),
+                  { Meter, Instance }
              end, Definitions)
   end.
 
 %% -type instrument_definition() :: {name(), instrument_kind(), instrument_opts()}.
-bind({Meter, {Name, _, _}}, Labels) ->
+bind({Meter, #instrument{name = Name}}, Labels) ->
   fun() ->
-      otel_meter:bind(Meter, Name, Labels)
+      {Meter, Name, Labels}
   end.
 
-record(BoundInstrument, Value) ->
+record({Meter, Name, Labels}, Value) ->
   fun() ->
-    otel_meter:record(BoundInstrument, Value)
+    otel_meter:record(Meter, Name, Value, Labels)
   end.
+
 
 'record\''({Meter, {Name, _, _ }}, Value, Labels) ->
   fun() ->
@@ -54,10 +57,17 @@ add(BoundInstrument, Value) ->
     otel_meter:record(Meter, Name, Value, Labels)
   end.
 
-registerObserver({Meter, { Name, _, _ }}, Callback) -> fun () ->
-  otel_meter:register_observer(Meter, Name, Callback)
-end.
+registerObserver({Meter, Instrument = #instrument{name = Name}}, Callback) ->
+  fun () ->
+      otel_meter:register_callback(Meter, [Instrument], Callback, Name)
+  end;
 
-observe(ObserverResult, Datum, Labels) -> fun () ->
-  otel_meter:observe(ObserverResult, Datum, Labels)
-end.
+registerObserver({Meter, { Name, _, _ }}, Callback) ->
+  fun () ->
+      otel_meter:register_observer(Meter, Name, Callback)
+  end.
+
+observe(Name, Datum, Labels) ->
+  fun () ->
+      {Name, Datum, Labels}
+  end.
