@@ -1,16 +1,16 @@
 -module(openTelemetry_metrics_valueObserver@foreign).
 
--export([int/1,
-         float/1]).
+-export([int/3,
+         float/3]).
 
-int(Name) ->
+int(Name, Description, Unit) ->
   fun(Meter) ->
-      otel_meter:create_counter(Meter, Name, #{description => <<>>,
-                                               unit => undefined})
+      otel_meter:create_counter(Meter, Name, #{description => Description,
+                                               unit => Unit})
   end.
 
-float(Name) ->
+float(Name, Description, Unit) ->
   fun(Meter) ->
-      otel_meter:create_counter(Meter, Name, #{description => <<>>,
-                                               unit => undefined})
+      otel_meter:create_counter(Meter, Name, #{description => Description,
+                                               unit => Unit})
   end.

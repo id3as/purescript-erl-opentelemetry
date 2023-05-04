@@ -6,6 +6,8 @@ module OpenTelemetry.Metrics
   , Instrument
   , InstrumentDefinition
   , InstrumentName(..)
+  , InstrumentUnit(..)
+  , InstrumentDescription(..)
   , Label
   , Meter
   , MeterName(..)
@@ -24,24 +26,27 @@ module OpenTelemetry.Metrics
   , registerApplicationMeter
   , registerMeter
   , setDefaultMeter
-  )
-  where
+  ) where
 
 import Prelude
 
 import Effect (Effect)
+import Erl.Atom (Atom)
 import Erl.Data.Tuple (Tuple2, tuple2)
 
 foreign import data Meter :: Type
 data Synchronicity
+
 foreign import data Synchronous :: Synchronicity
 foreign import data Asynchronous :: Synchronicity
 
 data Additivity
+
 foreign import data Additive :: Additivity
 foreign import data NonAdditive :: Additivity
 
 data Monotonicity
+
 foreign import data Monotonic :: Monotonicity
 foreign import data NonMonotonic :: Monotonicity
 
@@ -51,15 +56,30 @@ label :: String -> String -> Label
 label = tuple2
 
 newtype InstrumentName = InstrumentName String
-derive instance eqInstrumentName :: Eq InstrumentName
-instance showInstrumentName :: Show InstrumentName where
+
+derive instance Eq InstrumentName
+instance Show InstrumentName where
   show (InstrumentName n) = "InstrumentName " <> n
 
+newtype InstrumentUnit = InstrumentUnit Atom
+
+derive instance Eq InstrumentUnit
+instance Show InstrumentUnit where
+  show (InstrumentUnit n) = "InstrumentUnit " <> show n
+
+newtype InstrumentDescription = InstrumentDescription String
+
+derive instance Eq InstrumentDescription
+instance Show InstrumentDescription where
+  show (InstrumentDescription n) = "InstrumentDescription " <> n
+
 newtype MeterName = MeterName String
+
 instance showMeterName :: Show MeterName where
   show (MeterName n) = "MeterName " <> n
 
 newtype MeterVersion = MeterVersion String
+
 instance showMeterVersion :: Show MeterVersion where
   show (MeterVersion n) = "MeterVersion " <> n
 

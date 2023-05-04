@@ -1,7 +1,7 @@
 module OpenTelemetry.Metrics.ValueObserver where
 
-import OpenTelemetry as OpenTelemetry
 import OpenTelemetry (Asynchronous, NonAdditive, NonMonotonic)
+import OpenTelemetry as OpenTelemetry
 
 type Definition :: Type -> Type
 type Definition d = OpenTelemetry.InstrumentDefinition Asynchronous NonAdditive NonMonotonic d
@@ -12,6 +12,5 @@ type Instrument d = OpenTelemetry.Instrument Asynchronous NonAdditive NonMonoton
 type Bound :: Type -> Type
 type Bound d = OpenTelemetry.BoundInstrument Asynchronous NonAdditive NonMonotonic d
 
-foreign import int :: OpenTelemetry.InstrumentName -> Definition Int
-foreign import float :: OpenTelemetry.InstrumentName -> Definition Number
-
+foreign import int :: OpenTelemetry.InstrumentName -> OpenTelemetry.InstrumentDescription -> OpenTelemetry.InstrumentUnit -> Definition Int
+foreign import float :: OpenTelemetry.InstrumentName -> OpenTelemetry.InstrumentDescription -> OpenTelemetry.InstrumentUnit -> Definition Number
