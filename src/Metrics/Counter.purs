@@ -1,16 +1,24 @@
-module OpenTelemetry.Metrics.Counter where
+module OpenTelemetry.Metrics.Counter
+  ( Instrument
+  , InstrumentName
+  , int
+  , float
+  ) where
 
+import Effect (Effect)
 import OpenTelemetry (Synchronous, Additive, Monotonic)
 import OpenTelemetry as OpenTelemetry
 
-type Definition :: Type -> Type
-type Definition d = OpenTelemetry.InstrumentDefinition Synchronous Additive Monotonic d
+type InstrumentName :: Type -> Type
+type InstrumentName d = OpenTelemetry.InstrumentName Synchronous Additive Monotonic d
 
 type Instrument :: Type -> Type
 type Instrument d = OpenTelemetry.Instrument Synchronous Additive Monotonic d
 
-type Bound :: Type -> Type
-type Bound d = OpenTelemetry.BoundInstrument Synchronous Additive Monotonic d
+int :: OpenTelemetry.Meter -> InstrumentName Int -> OpenTelemetry.InstrumentOptions -> Effect (Instrument Int)
+int = create
 
-foreign import int :: OpenTelemetry.InstrumentName -> OpenTelemetry.InstrumentDescription -> OpenTelemetry.InstrumentUnit -> Definition Int
-foreign import float :: OpenTelemetry.InstrumentName -> OpenTelemetry.InstrumentDescription -> OpenTelemetry.InstrumentUnit -> Definition Number
+float :: OpenTelemetry.Meter -> InstrumentName Number -> OpenTelemetry.InstrumentOptions -> Effect (Instrument Number)
+float = create
+
+foreign import create :: forall d. OpenTelemetry.Meter -> InstrumentName d -> OpenTelemetry.InstrumentOptions -> Effect (Instrument d)

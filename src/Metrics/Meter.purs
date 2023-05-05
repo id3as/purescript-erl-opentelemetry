@@ -1,21 +1,11 @@
 module OpenTelemetry.Metrics.Meter where
 
 import Prelude
+import Data.Maybe (Maybe)
 import Effect (Effect)
 import Erl.Data.List (List)
-import Effect.Uncurried (EffectFn1)
-import OpenTelemetry (InstrumentDefinition, Instrument, InstrumentName, Label, BoundInstrument, Meter, Additive, Synchronous, Asynchronous, ObserverResult)
+import OpenTelemetry (Instrument, InstrumentName, InstrumentAttributes, Meter, Synchronous)
 
-foreign import newInstrument :: forall s a m d. Meter -> InstrumentDefinition s a m d -> Effect (Instrument s a m d)
-foreign import newInstruments :: forall s a m d. Meter -> List (InstrumentDefinition s a m d) -> Effect (Instrument s a m d)
+foreign import lookupInstrument :: forall s a m d. Meter -> InstrumentName s a m d -> Effect (Maybe (Instrument s a m d))
 
-foreign import bind :: forall a m d. Instrument Synchronous a m d -> List Label -> Effect (BoundInstrument Synchronous a m d)
-
-foreign import record :: forall a m d. BoundInstrument Synchronous a m d -> d -> Effect Unit
-foreign import record' :: forall a m d. Instrument Synchronous a m d -> d -> List Label -> Effect Unit
-
-foreign import add :: forall m d. BoundInstrument Synchronous Additive m d -> d -> Effect Unit
-foreign import add' :: forall m d. Instrument Synchronous Additive m d -> d -> List Label -> Effect Unit
-
-foreign import registerObserver :: forall a m d. Instrument Asynchronous a m d -> EffectFn1 InstrumentName (List (ObserverResult a m d)) -> Effect Unit
-foreign import observe :: forall a m d. InstrumentName -> d -> List Label -> Effect (ObserverResult a m d)
+foreign import record :: forall a m d. Meter -> Instrument Synchronous a m d -> InstrumentAttributes -> d -> Effect Unit

@@ -2,23 +2,11 @@
 
 -include_lib("opentelemetry_api/include/opentelemetry.hrl").
 
--export([ registerMeter/2
-        , registerApplicationMeter/1
-        , setDefaultMeter/1
+-export([ setDefaultMeter/1
         , getDefaultMeter/0
         , getMeter/0
         , 'getMeter\''/1
         ]).
-
-registerMeter(Name, Version) ->
-  fun() ->
-    opentelemetry_experimental:register_meter(binary_to_atom(Name, utf8), Version)
-  end.
-
-registerApplicationMeter(Name) ->
-  fun() ->
-    opentelemetry_experimental:register_application_meter(binary_to_atom(Name, utf8))
-  end.
 
 setDefaultMeter(Meter) ->
   fun() ->

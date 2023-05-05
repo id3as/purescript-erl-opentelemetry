@@ -1,14 +1,8 @@
 -module(openTelemetry_metrics_upDownCounter@foreign).
 
--export([int/1,
-         float/1]).
+-export([create/3]).
 
-int(Name) ->
-  otel_updown_counter:definition(Name, #{
-                            number_kind => integer
-                           }).
-
-float(Name) ->
-  otel_updown_counter:definition(Name, #{
-                            number_kind => float
-                           }).
+create(Meter, Name, Opts) ->
+  fun() ->
+      otel_meter:create_updown_counter(Meter, Name, Opts)
+  end.

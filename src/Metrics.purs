@@ -2,13 +2,16 @@ module OpenTelemetry.Metrics
   ( Additive
   , Additivity(..)
   , Asynchronous
-  , BoundInstrument
   , Instrument
-  , InstrumentDefinition
+  , InstrumentAttributes(..)
+  , InstrumentCallback
+  , InstrumentCallbackResult(..)
+  , InstrumentObservation
+  , InstrumentNamedObservation
   , InstrumentName(..)
+  , InstrumentOptions
   , InstrumentUnit(..)
   , InstrumentDescription(..)
-  , Label
   , Meter
   , MeterName(..)
   , MeterVersion(..)
@@ -16,25 +19,27 @@ module OpenTelemetry.Metrics
   , Monotonicity(..)
   , NonAdditive
   , NonMonotonic
-  , ObserverResult
   , Synchronicity(..)
   , Synchronous
   , getDefaultMeter
   , getMeter
   , getMeter'
-  , label
-  , registerApplicationMeter
-  , registerMeter
   , setDefaultMeter
+  , mergeInstrumentAttributes
+  , emptyInstrumentAttributes
   ) where
 
 import Prelude
 
+import Data.Newtype (class Newtype)
+import Effect.Uncurried (EffectFn1)
 import Effect (Effect)
 import Erl.Atom (Atom)
+import Erl.Data.List (List)
+import Erl.Data.Map (Map)
+import Erl.Data.Map as Map
 import Erl.Data.Tuple (Tuple2, tuple2)
 
-foreign import data Meter :: Type
 data Synchronicity
 
 foreign import data Synchronous :: Synchronicity
@@ -50,15 +55,28 @@ data Monotonicity
 foreign import data Monotonic :: Monotonicity
 foreign import data NonMonotonic :: Monotonicity
 
-type Label = Tuple2 String String
+newtype InstrumentAttributes = InstrumentAttributes (Map String String)
 
-label :: String -> String -> Label
-label = tuple2
+derive instance Eq InstrumentAttributes
+derive instance Ord InstrumentAttributes
+derive instance Newtype InstrumentAttributes _
 
-newtype InstrumentName = InstrumentName String
+instance Show InstrumentAttributes where
+  show (InstrumentAttributes map) = show map
 
-derive instance Eq InstrumentName
-instance Show InstrumentName where
+mergeInstrumentAttributes :: InstrumentAttributes -> InstrumentAttributes -> InstrumentAttributes
+mergeInstrumentAttributes (InstrumentAttributes lhs) (InstrumentAttributes rhs) =
+  InstrumentAttributes $ Map.union lhs rhs
+
+emptyInstrumentAttributes :: InstrumentAttributes
+emptyInstrumentAttributes =
+  InstrumentAttributes Map.empty
+
+newtype InstrumentName :: Synchronicity -> Additivity -> Monotonicity -> Type -> Type
+newtype InstrumentName s a m d = InstrumentName String
+
+derive instance Eq (InstrumentName s a m d)
+instance Show (InstrumentName s a m d) where
   show (InstrumentName n) = "InstrumentName " <> n
 
 newtype InstrumentUnit = InstrumentUnit Atom
@@ -71,32 +89,41 @@ newtype InstrumentDescription = InstrumentDescription String
 
 derive instance Eq InstrumentDescription
 instance Show InstrumentDescription where
-  show (InstrumentDescription n) = "InstrumentDescription " <> n
+  show (InstrumentDescription n) = "InstrumentDescription " <> show n
 
 newtype MeterName = MeterName String
 
-instance showMeterName :: Show MeterName where
+instance Show MeterName where
   show (MeterName n) = "MeterName " <> n
 
 newtype MeterVersion = MeterVersion String
 
-instance showMeterVersion :: Show MeterVersion where
+instance Show MeterVersion where
   show (MeterVersion n) = "MeterVersion " <> n
 
-data InstrumentDefinition :: Synchronicity -> Additivity -> Monotonicity -> Type -> Type
-data InstrumentDefinition s a m d = InstrumentDefinition InstrumentName
+foreign import data Meter :: Type
 
-data Instrument :: Synchronicity -> Additivity -> Monotonicity -> Type -> Type
-data Instrument s a m d = Instrument (InstrumentDefinition s a m d)
+type InstrumentOptions =
+  { description :: InstrumentDescription
+  , unit :: InstrumentUnit
+  }
 
-data BoundInstrument :: Synchronicity -> Additivity -> Monotonicity -> Type -> Type
-data BoundInstrument s a m d = BoundInstrument (InstrumentDefinition s a m d)
+type InstrumentObservation :: Type -> Type
+type InstrumentObservation d = Tuple2 d InstrumentAttributes
 
-data ObserverResult :: Additivity -> Monotonicity -> Type -> Type
-data ObserverResult a m d = ObserverResult
+type InstrumentNamedObservation :: Additivity -> Monotonicity -> Type -> Type
+type InstrumentNamedObservation a m d = Tuple2 (InstrumentName Asynchronous a m d) (List (InstrumentObservation d))
 
-foreign import registerMeter :: MeterName -> MeterVersion -> Effect Unit
-foreign import registerApplicationMeter :: MeterName -> Effect Unit
+data InstrumentCallbackResult :: Additivity -> Monotonicity -> Type -> Type
+data InstrumentCallbackResult a m d
+  = Observation (List (InstrumentObservation d))
+  | NamedObservation (List (InstrumentNamedObservation a m d))
+
+type InstrumentCallback :: Additivity -> Monotonicity -> Type -> Type
+type InstrumentCallback a m d = EffectFn1 (InstrumentName Asynchronous a m d) (InstrumentCallbackResult a m d)
+
+foreign import data Instrument :: Synchronicity -> Additivity -> Monotonicity -> Type -> Type
+
 foreign import setDefaultMeter :: Meter -> Effect Unit
 foreign import getDefaultMeter :: Effect Meter
 foreign import getMeter :: Effect Meter
