@@ -4,12 +4,12 @@
 
 create(Meter, Name, Callback, Opts) ->
   fun() ->
-      otel_meter:create_observable_counter(Meter, Name, fun(Arg) ->
-                                                                case Callback(Arg) of
-                                                                    {observation, O} ->
-                                                                        O;
-                                                                    {namedObservation, Val} ->
-                                                                        Val
-                                                                end
-                                                        end, Name, Opts)
+      otel_meter:create_observable_gauge(Meter, Name, fun(Arg) ->
+                                                          case Callback(Arg) of
+                                                            {observation, O} ->
+                                                              O;
+                                                            {namedObservation, Val} ->
+                                                              Val
+                                                          end
+                                                      end, Name, Opts)
   end.
