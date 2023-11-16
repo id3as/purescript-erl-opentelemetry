@@ -38,7 +38,7 @@ import Erl.Atom (Atom)
 import Erl.Data.List (List)
 import Erl.Data.Map (Map)
 import Erl.Data.Map as Map
-import Erl.Data.Tuple (Tuple2, tuple2)
+import Erl.Data.Tuple (Tuple2)
 
 data Synchronicity
 
@@ -55,7 +55,7 @@ data Monotonicity
 foreign import data Monotonic :: Monotonicity
 foreign import data NonMonotonic :: Monotonicity
 
-newtype InstrumentAttributes = InstrumentAttributes (Map String String)
+newtype InstrumentAttributes = InstrumentAttributes (Map Atom String)
 
 derive instance Eq InstrumentAttributes
 derive instance Ord InstrumentAttributes
@@ -73,11 +73,11 @@ emptyInstrumentAttributes =
   InstrumentAttributes Map.empty
 
 newtype InstrumentName :: Synchronicity -> Additivity -> Monotonicity -> Type -> Type
-newtype InstrumentName s a m d = InstrumentName String
+newtype InstrumentName s a m d = InstrumentName Atom
 
 derive instance Eq (InstrumentName s a m d)
 instance Show (InstrumentName s a m d) where
-  show (InstrumentName n) = "InstrumentName " <> n
+  show (InstrumentName n) = "InstrumentName " <> (show n)
 
 newtype InstrumentUnit = InstrumentUnit Atom
 
