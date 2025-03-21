@@ -18,5 +18,5 @@ lookupInstrument(Meter, Name) ->
 
 record(Meter, #instrument{name = Name}, Attributes, Value) ->
   fun() ->
-    otel_meter:record(Meter, Name, Value, Attributes)
+    otel_meter:record(otel_ctx:new(), Meter, Name, Value, Attributes)
   end.
