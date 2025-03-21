@@ -1,6 +1,6 @@
 -module(openTelemetry_metrics@foreign).
 
--include_lib("opentelemetry_api/include/opentelemetry.hrl").
+%% -include_lib("opentelemetry_api/include/opentelemetry.hrl").
 
 -export([ setDefaultMeter/1
         , getDefaultMeter/0

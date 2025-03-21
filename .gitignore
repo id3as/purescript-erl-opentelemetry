@@ -6,3 +6,4 @@ output/
 testoutput/
 _build/
 *.dump
+ebin
